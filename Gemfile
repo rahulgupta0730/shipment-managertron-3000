@@ -6,12 +6,13 @@ gem 'sqlite3'
 gem 'puma'
 gem 'jbuilder'
 gem 'kaminari'
+gem 'logger', '~> 1.5.3'
 
 group :development, :test do
   gem 'byebug', platform: :mri
   gem 'faker'
   gem 'pry'
-  gem 'factory_bot_rails'
+  gem 'factory_bot_rails', '~> 6.2.0'
 end
 
 group :development do

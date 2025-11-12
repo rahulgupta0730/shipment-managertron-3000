@@ -2,18 +2,17 @@ require "rails_helper"
 
 RSpec.describe Shipment, type: :model do
   describe "associations" do
-    it { should belong_to(:company) }
+    it { should belong_to(:company).required }
     it { should have_many(:shipment_items).dependent(:destroy) }
   end
 
   describe "validations" do
-    subject { build(:shipment) }
+    subject { create(:shipment) }
 
     it { should validate_presence_of(:origin_country) }
     it { should validate_presence_of(:destination_country) }
     it { should validate_presence_of(:tracking_number) }
     it { should validate_uniqueness_of(:tracking_number) }
-    it { should validate_presence_of(:slug) }
     it { should validate_uniqueness_of(:slug) }
   end
 

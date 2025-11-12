@@ -1,23 +1,27 @@
 require "rails_helper"
 
 RSpec.describe ShipmentsController, type: :controller do
-  describe "GET #index" do
-    let!(:company) { create(:company) }
-    let!(:shipments) { create_list(:shipment, 30, company: company) }
+  render_views
 
+  describe "GET #index" do
+    let(:company) { create(:company) }
+    
     before do
-      shipments.each do |shipment|
+      Shipment.destroy_all
+      30.times do
+        shipment = create(:shipment, company: company)
         create_list(:shipment_item, 2, shipment: shipment)
       end
     end
 
     it "returns http success" do
-      get :index, format: :json
+      get :index
       expect(response).to have_http_status(:success)
+      expect(response.content_type).to include('application/json')
     end
 
     it "returns paginated shipments" do
-      get :index, format: :json
+      get :index
       json = JSON.parse(response.body)
       
       expect(json["shipments"].size).to eq(25) # default per_page
@@ -27,7 +31,7 @@ RSpec.describe ShipmentsController, type: :controller do
     end
 
     it "respects pagination parameters" do
-      get :index, params: { page: 2, per_page: 10 }, format: :json
+      get :index, params: { page: 2, per_page: 10 }
       json = JSON.parse(response.body)
       
       expect(json["shipments"].size).to eq(10)
@@ -35,7 +39,7 @@ RSpec.describe ShipmentsController, type: :controller do
     end
 
     it "includes company and items in response" do
-      get :index, format: :json
+      get :index
       json = JSON.parse(response.body)
       first_shipment = json["shipments"].first
       
@@ -52,7 +56,7 @@ RSpec.describe ShipmentsController, type: :controller do
         queries << details[:sql] unless details[:sql].include?('SCHEMA')
       end
       
-      get :index, format: :json
+      get :index
       
       # Should be approximately 3 queries: 
       # 1. SELECT shipments
@@ -68,12 +72,13 @@ RSpec.describe ShipmentsController, type: :controller do
     let!(:items) { create_list(:shipment_item, 3, shipment: shipment) }
 
     it "returns http success" do
-      get :show, params: { id: shipment.slug }, format: :json
+      get :show, params: { id: shipment.slug }
       expect(response).to have_http_status(:success)
+      expect(response.content_type).to include('application/json')
     end
 
     it "returns the correct shipment" do
-      get :show, params: { id: shipment.slug }, format: :json
+      get :show, params: { id: shipment.slug }
       json = JSON.parse(response.body)
       
       expect(json["shipment"]["slug"]).to eq(shipment.slug)
@@ -81,14 +86,14 @@ RSpec.describe ShipmentsController, type: :controller do
     end
 
     it "includes all shipment items" do
-      get :show, params: { id: shipment.slug }, format: :json
+      get :show, params: { id: shipment.slug }
       json = JSON.parse(response.body)
       
       expect(json["shipment"]["items"].size).to eq(3)
     end
 
     it "returns 404 for non-existent slug" do
-      get :show, params: { id: "nonexistent" }, format: :json
+      get :show, params: { id: "nonexistent" }
       expect(response).to have_http_status(:not_found)
       
       json = JSON.parse(response.body)

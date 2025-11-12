@@ -1,5 +1,5 @@
 class Shipment < ApplicationRecord
-  belongs_to :company
+  belongs_to :company, optional: false
   has_many :shipment_items, dependent: :destroy
 
   validates :origin_country, presence: true
